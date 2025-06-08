@@ -3,7 +3,14 @@ name = "cooldata"
 version = "0.1.7"
 description = "CoolData: An electronics cooling dataset"
 readme = "README.md"
-authors = ["Eya Chouaib, Firas Drass, Jana Huhne, Ole Petersen, Beatrice Picco, Daniel Schenk"]
+authors = [
+  { name = "Eya Chouaib" },
+  { name = "Firas Drass" },
+  { name = "Jana Huhne" },
+  { name = "Ole Petersen" },
+  { name = "Beatrice Picco" },
+  { name = "Daniel Schenk" },
+]
 requires-python = "~=3.11"
 dependencies = [
     "huggingface-hub>=0.27.1",
@@ -39,3 +46,9 @@ name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.13",
+    "sphinx-rtd-theme>=3.0.2",
+]

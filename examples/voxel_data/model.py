@@ -1,8 +1,9 @@
+import math
+from typing import List, Optional, Tuple, Union
+
+import numpy as np
 import torch
 import torch.nn as nn
-import math
-import numpy as np
-from typing import Optional, Tuple, List, Union
 
 
 class PatchEmbedding(nn.Module):

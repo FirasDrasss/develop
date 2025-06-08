@@ -12,13 +12,6 @@ cooldata.dgl\_flow\_field\_dataset module
    :undoc-members:
    :show-inheritance:
 
-cooldata.flow\_field\_dataset module
-------------------------------------
-
-.. automodule:: cooldata.flow_field_dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 cooldata.metadata module
 ------------------------

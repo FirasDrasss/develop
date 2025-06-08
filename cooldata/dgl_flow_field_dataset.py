@@ -12,17 +12,19 @@ except ImportError as e:
         {e}"""
     )
 
-import torch
+import concurrent.futures
+import shutil
+
+import numpy as np
 import pyvista as pv
+import torch
 from tqdm import tqdm
+
 from cooldata.pyvista_flow_field_dataset import (
     PyvistaFlowFieldDataset,
     PyvistaSample,
     SurfaceFieldType,
 )
-import numpy as np
-import concurrent.futures
-import shutil
 
 
 def process_sample(args):
@@ -411,7 +413,7 @@ class DGLSurfaceFlowFieldDataset(torch.utils.data.Dataset):
         Shuffle the dataset.
         """
         np.random.shuffle(self.files)
-        
+
     def select_subset(self, indices: List[int]) -> "DGLSurfaceFlowFieldDataset":
         """
         Select a subset of the dataset based on the given indices.
@@ -448,25 +450,25 @@ class DGLSurfaceFlowFieldDataset(torch.utils.data.Dataset):
             block_indices = list(range(len(sample.surface_data[0])))
 
         for block_index in block_indices:
-            grid= sample.surface_data[0][block_index]
+            grid = sample.surface_data[0][block_index]
             # TODO: Speed up this loop
             grid.cell_data["BodyID"] = block_index
             block_name = sample.surface_data[0].get_block_name(block_index)
             surface_type = -1
-            if 'wall' in block_name.lower():
+            if "wall" in block_name.lower():
                 surface_type = 0
-            elif 'inlet' in block_name.lower():
+            elif "inlet" in block_name.lower():
                 surface_type = 1
-            elif 'outlet' in block_name.lower():
+            elif "outlet" in block_name.lower():
                 surface_type = 2
-            elif 'symmetry' in block_name.lower():
+            elif "symmetry" in block_name.lower():
                 surface_type = 3
-            elif 'body' in block_name.lower():
+            elif "body" in block_name.lower():
                 surface_type = 4
             else:
                 print(f"Unknown surface type for block {block_index}: {block_name}")
             grid.cell_data["SurfaceType"] = surface_type
-            if 'WallShearStress_0' not in grid.cell_data:
+            if "WallShearStress_0" not in grid.cell_data:
                 grid.cell_data["WallShearStress_0"] = 0.0
                 grid.cell_data["WallShearStress_1"] = 0.0
                 grid.cell_data["WallShearStress_2"] = 0.0
@@ -478,7 +480,7 @@ class DGLSurfaceFlowFieldDataset(torch.utils.data.Dataset):
             edges_from.extend([i] * len(neighbors))
             edges_to.extend(neighbors)
         graph = dgl.graph((edges_from, edges_to), num_nodes=combined.n_cells)
-        graph.ndata["Pressure"]= torch.tensor(
+        graph.ndata["Pressure"] = torch.tensor(
             combined.cell_data["Pressure"], dtype=torch.float32
         )
         graph.ndata["Temperature"] = torch.tensor(
@@ -487,19 +489,13 @@ class DGLSurfaceFlowFieldDataset(torch.utils.data.Dataset):
         centers = torch.tensor(combined.cell_centers().points, dtype=torch.float32)
         graph.ndata["Position"] = centers
         shear_stresses = (
-            torch.tensor(
-                combined.cell_data["WallShearStress_0"], dtype=torch.float32
-            ),
-            torch.tensor(
-                combined.cell_data["WallShearStress_1"], dtype=torch.float32
-            ),
-            torch.tensor(
-                combined.cell_data["WallShearStress_2"], dtype=torch.float32
-            ),
+            torch.tensor(combined.cell_data["WallShearStress_0"], dtype=torch.float32),
+            torch.tensor(combined.cell_data["WallShearStress_1"], dtype=torch.float32),
+            torch.tensor(combined.cell_data["WallShearStress_2"], dtype=torch.float32),
         )
 
         shear_stress = torch.stack(shear_stresses, dim=1)
-        graph.ndata["ShearStress"]= shear_stress
+        graph.ndata["ShearStress"] = shear_stress
         graph.ndata["Normal"] = torch.tensor(
             combined.extract_surface().face_normals, dtype=torch.float32
         )

@@ -1,19 +1,27 @@
 import os
-from pathlib import Path
-import pyvista as pv
-from typing import Literal
-import numpy as np
-
-import huggingface_hub as hf  # type: ignore
+import re
 import shutil
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from tqdm import tqdm
-import re
+from pathlib import Path
+from typing import Literal
+
+import huggingface_hub as hf  # type: ignore
+import numpy as np
 import pandas as pd
+import pyvista as pv
+from tqdm import tqdm
 
-from cooldata.metadata import df_row_to_system_parameters, SystemParameters
+from cooldata.metadata import SystemParameters, df_row_to_system_parameters
 
-VolumeFieldType = Literal["Velocity_0", "Velocity_1", "Velocity_2", "Pressure", "Temperature", "TurbulentKineticEnergy", "TurbulentDissipationRate"]
+VolumeFieldType = Literal[
+    "Velocity_0",
+    "Velocity_1",
+    "Velocity_2",
+    "Pressure",
+    "Temperature",
+    "TurbulentKineticEnergy",
+    "TurbulentDissipationRate",
+]
 
 
 SurfaceFieldType = Literal[

@@ -1,4 +1,5 @@
 from typing import List, NamedTuple
+
 import pandas as pd
 
 
@@ -131,7 +132,7 @@ def df_row_to_system_parameters(df: pd.DataFrame, design_id: int) -> SystemParam
         raise TypeError("Input 'df' must be a pandas DataFrame.")
     if not isinstance(design_id, int):
         raise TypeError("'design_id' must be an integer.")
-    row_id = design_id -1
+    row_id = design_id - 1
     if not 0 <= row_id < len(df):
         raise IndexError(
             f"'row_id' {row_id} is out of bounds for DataFrame with {len(df)} rows."

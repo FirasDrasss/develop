@@ -3,26 +3,30 @@ import sys
 
 base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 sys.path.append(base_path)
+import numpy as np
+import pandas as pd
+import torch
+from flow_field_model import create_flow_field_model
+from model import FlowFieldTransformer, count_parameters
+from torch.utils.data import DataLoader
+
+from cooldata.pyvista_flow_field_dataset import PyvistaFlowFieldDataset
 from cooldata.voxel_flow_field_dataset import (
     VoxelFlowFieldDataset,
     VoxelFlowFieldDatasetConfig,
 )
 
-from model import FlowFieldTransformer, count_parameters
-from torch.utils.data import DataLoader
-from cooldata.pyvista_flow_field_dataset import PyvistaFlowFieldDataset
-import torch
-from flow_field_model import create_flow_field_model
-import pandas as pd
-import numpy as np
-
 if __name__ == "__main__":
-    ds_pv = PyvistaFlowFieldDataset.load_from_huggingface(num_samples=100, data_dir='datasets/pyvista-medium')
-    ds_voxel = VoxelFlowFieldDataset(cache_dir='datasets/voxels-medium', config=VoxelFlowFieldDatasetConfig(
-        pyvista_dataset=ds_pv,
-        resolution=(32,16,16)
-    ))
-    #ds_voxel = VoxelFlowFieldDataset(cache_dir="datasets/voxels-medium")
+    ds_pv = PyvistaFlowFieldDataset.load_from_huggingface(
+        num_samples=100, data_dir="datasets/pyvista-medium"
+    )
+    ds_voxel = VoxelFlowFieldDataset(
+        cache_dir="datasets/voxels-medium",
+        config=VoxelFlowFieldDatasetConfig(
+            pyvista_dataset=ds_pv, resolution=(32, 16, 16)
+        ),
+    )
+    # ds_voxel = VoxelFlowFieldDataset(cache_dir="datasets/voxels-medium")
     ds_voxel.normalize()
     ds_voxel.shuffle()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -77,5 +81,11 @@ if __name__ == "__main__":
             val_loss /= len(val_dataset)
             val_losses.append(val_loss)
         print(f"Epoch {epoch}, Loss: {losses[-1]}, Val Loss: {val_loss}")
-    df = pd.DataFrame({"train_loss": losses, "validation_loss": val_losses, "epoch": list(range(len(losses)))})
+    df = pd.DataFrame(
+        {
+            "train_loss": losses,
+            "validation_loss": val_losses,
+            "epoch": list(range(len(losses))),
+        }
+    )
     df.to_csv("figures/losses.csv", index=False)

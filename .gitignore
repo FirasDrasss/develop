@@ -10,3 +10,4 @@ examples/voxel_data/cooldata
 examples/meshgraphnet/datasets
 datasets/
 examples/voxel_data/logs/
+docs/_build
