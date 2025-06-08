@@ -1,10 +1,8 @@
 API Reference
 ================
 
-Submodules
-----------
 
-cooldata.dgl\_flow\_field\_dataset module
+cooldata.dgl_flow_field_dataset module
 -----------------------------------------
 
 .. automodule:: cooldata.dgl_flow_field_dataset
@@ -21,7 +19,7 @@ cooldata.metadata module
    :undoc-members:
    :show-inheritance:
 
-cooldata.pyvista\_flow\_field\_dataset module
+cooldata.pyvista_flow_field_dataset module
 ---------------------------------------------
 
 .. automodule:: cooldata.pyvista_flow_field_dataset
@@ -29,18 +27,10 @@ cooldata.pyvista\_flow\_field\_dataset module
    :undoc-members:
    :show-inheritance:
 
-cooldata.voxel\_flow\_field\_dataset module
+cooldata.voxel_flow_field_dataset module
 -------------------------------------------
 
 .. automodule:: cooldata.voxel_flow_field_dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: cooldata
    :members:
    :undoc-members:
    :show-inheritance:
