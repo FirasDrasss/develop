@@ -30,12 +30,14 @@ from cooldata.pyvista_flow_field_dataset import (
 def process_sample(args):
     cache_dir, sample, i = args
     g = DGLVolumeFlowFieldDataset.pyvista_to_volume_dgl(sample)
+    print("Saving graph to cache directory:", os.path.join(cache_dir, f"{i}.dgl"))
     dgl.save_graphs(os.path.join(cache_dir, f"{i}.dgl"), g)
+    print("Graph saved successfully.")
 
 
 class DGLVolumeFlowFieldDataset(torch.utils.data.Dataset):
     def __init__(
-        self, cache_dir: str, pyvista_dataset: PyvistaFlowFieldDataset | None = None
+        self, cache_dir: str, pyvista_dataset: PyvistaFlowFieldDataset | None = None, parallel_conversion: bool = True
     ):
         """
         Creates a new DGLVolumeFlowFieldDataset. If a PyvistaFlowFieldDataset is provided, it will be converted to DGLGraphs and stored in the cache directory. If not, the dataset will be loaded from the cache directory.
@@ -47,6 +49,7 @@ class DGLVolumeFlowFieldDataset(torch.utils.data.Dataset):
             The directory where the dataset converted to DGLGraphs is stored. Default None.
         """
         self.cache_dir = Path(os.path.abspath(cache_dir))
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.node_stats: tuple[dict, dict] | None = None
         self.edge_stats: tuple[dict, dict] | None = None
         if not self.cache_dir.exists():
@@ -58,19 +61,27 @@ class DGLVolumeFlowFieldDataset(torch.utils.data.Dataset):
         if pyvista_dataset is not None:
             # clear the cache directory
             shutil.rmtree(self.cache_dir)
+            self.cache_dir.mkdir(parents=True)
             pyvista_dataset.unload()
-            args = [
-                (self.cache_dir, pyvista_dataset[i], i)
-                for i in range(len(pyvista_dataset))
-            ]
-            with concurrent.futures.ProcessPoolExecutor() as executor:
-                list(
-                    tqdm(
-                        executor.map(process_sample, args),
-                        total=len(pyvista_dataset),
-                        desc="Converting Pyvista dataset to DGLGraphs",
+            if parallel_conversion:
+                args = [
+                    (self.cache_dir, pyvista_dataset[i], i)
+                    for i in range(len(pyvista_dataset))
+                ]
+                with concurrent.futures.ProcessPoolExecutor() as executor:
+                    list(
+                        tqdm(
+                            executor.map(process_sample, args),
+                            total=len(pyvista_dataset),
+                            desc="Converting Pyvista dataset to DGLGraphs",
+                        )
                     )
-                )
+            else:
+                for i in tqdm(
+                    range(len(pyvista_dataset)),
+                    desc="Converting Pyvista dataset to DGLGraphs",
+                ):
+                    process_sample((self.cache_dir, pyvista_dataset[i], i))
         self.files = [f for f in self.cache_dir.iterdir() if f.suffix == ".dgl"]
 
     def __len__(self):
@@ -106,7 +117,7 @@ class DGLVolumeFlowFieldDataset(torch.utils.data.Dataset):
         edges_to = []
 
         # TODO: Speed up this loop
-        for i in range(grid.n_cells):
+        for i in tqdm(range(grid.n_cells)):
             neighbors = grid.cell_neighbors(i)
             edges_from.extend([i] * len(neighbors))
             edges_to.extend(neighbors)
