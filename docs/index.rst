@@ -17,8 +17,8 @@ It supports advanced techniques, including graph neural networks and voxelized m
    :maxdepth: 2
    :caption: Contents:
 
-   usage/example_metadata
-   usage/autodoc
+   usage/getting_started
+   api-reference/cooldata
 
 Features
 ---------

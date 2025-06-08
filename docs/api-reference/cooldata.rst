@@ -1,4 +1,4 @@
-cooldata package
+API Reference
 ================
 
 Submodules
