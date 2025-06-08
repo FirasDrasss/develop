@@ -1,4 +1,4 @@
-# Dataset Library for 3D Machine Learning
+# Cooldata
 
 This Python dataset library is designed to streamline the end-to-end model training process, enabling efficient loading, visualization, and preparation of 3D data for machine learning applications. It supports advanced techniques, including graph neural networks and voxelized methods, with seamless integration into PyTorch workflows.
 
