@@ -19,6 +19,7 @@ It supports advanced techniques, including graph neural networks and voxelized m
 
    usage/getting_started
    usage/voxels
+   usage/dgl
    api-reference/cooldata
 
 Features

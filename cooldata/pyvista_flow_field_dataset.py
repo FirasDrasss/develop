@@ -40,6 +40,9 @@ SurfaceFieldType = Literal[
 
 
 class PyvistaSample:
+    """
+    A PyVista sample representing a 3D flow field dataset. The data is stored on disk and can be loaded to a PyVista object when needed
+    """
     def __init__(
         self,
         volume_path: str | Path,
@@ -259,6 +262,9 @@ Make sure volume data is accessible and valid.</p>"""
 
 
 class PyvistaFlowFieldDataset:
+    """
+    The main class for working with the cooldata dataset.
+    """
     def __init__(self, samples: list[PyvistaSample]):
         self.samples = samples
 
@@ -319,14 +325,10 @@ class PyvistaFlowFieldDataset:
         cls, data_dir: str | Path, num_samples=3
     ) -> "PyvistaFlowFieldDataset":
         """
-        Download all files from the specified Hugging Face repository to a given local path and load them as a PyvistaFlowFieldDataset.
-
+        Download the given number of samples from huggingface to data_dir.
         Args:
-            path (str): The local directory where the data will be saved.
-            hub_repo (str): The Hugging Face repository ID (e.g., 'bert-base-uncased').
-
-        Returns:
-            PyvistaFlowFieldDataset
+        - data_dir: The directory to download the data to.
+        - num_samples: The number of samples to download
         """
         loaded = cls.try_from_directory(data_dir, num_samples)
         if loaded is not None:
