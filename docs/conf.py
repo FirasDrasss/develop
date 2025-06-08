@@ -72,4 +72,4 @@ html_sidebars = {
     ]
 }
 
-jupyter_execute_notebooks = "off"
+nb_execution_mode = "off"
