@@ -71,3 +71,5 @@ html_sidebars = {
         "searchbox.html",
     ]
 }
+
+jupyter_execute_notebooks = "off"
