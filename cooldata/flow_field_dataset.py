@@ -11,6 +11,27 @@ import h5py
 import torch
 
 class FlowGeometry:
+    """
+    Represents the geometry of a flow field, including mesh structure and boundary data.
+
+    This class contains point coordinates, edge connectivity, and detailed boundary condition
+    information. It also stores surface-related data like normals and surface associations.
+
+    Attributes:
+        points (torch.Tensor): Tensor of shape (num_points, 3) with 3D coordinates of each point.
+        connectivity (torch.Tensor): Tensor of shape (num_edges, 2), dtype=torch.int32.
+            Each row defines an edge between two points by their indices.
+        boundary_conditions (torch.Tensor): Tensor of shape (num_edges,), dtype=torch.int8.
+            Indicates boundary type per edge:
+                - 0: Internal
+                - 1: Inflow
+                - 2: Outflow
+                - 3+: Wall (body index)
+        surface_indices (torch.Tensor): Tensor of shape (num_surface_points,), dtype=torch.int32.
+            Associates each surface point with a surface/body.
+        surface_normals (torch.Tensor): Tensor of shape (num_surface_points, 3), dtype=torch.float32.
+            Contains normal vectors at each surface point.
+    """
     def __init__(
         self,
         points: torch.Tensor,
@@ -20,20 +41,19 @@ class FlowGeometry:
         surface_normals: torch.Tensor,
     ) -> None:
         """
-        Geometry of a flow field. Contains the points, connectivity, and boundary conditions.
-        
-        Parameters:
-        - points: torch.Tensor of shape (num_points, 3)
-        - connectivity: torch.Tensor of shape (num_edges, 2) of type torch.int32. Contains the indices of the two points that each edge connects.
-        - boundary_conditions: torch.Tensor of shape (num_edges,) of type torch.int8. Contains a marker for each node, indicating:
-            - 0: internal node
-            - 1: inflow boundary node
-            - 2: outflow boundary node
-            - 3,4,5,...: wall boundary node. The index indicates which body the wall belongs to.
-            
-        - surface_indices: torch.Tensor of shape (num_surface_points,) of type torch.int32. Contains the index of the surface that each edge belongs to.
-        - surface_normals: torch.Tensor of shape (num_surface_points, 3). Contains the normal vector of the surface at each point.
-        
+        Initializes the FlowGeometry object with point cloud and connectivity data.
+
+        Args:
+            points (torch.Tensor): Tensor of shape (num_points, 3), dtype=torch.float32.
+                3D coordinates of all points.
+            connectivity (torch.Tensor): Tensor of shape (num_edges, 2), dtype=torch.int32.
+                Edge definitions using point indices.
+            boundary_conditions (torch.Tensor): Tensor of shape (num_edges,), dtype=torch.int8.
+                Type of each edge (0 = internal, 1 = inflow, 2 = outflow, 3+ = wall).
+            surface_indices (torch.Tensor): Tensor of shape (num_surface_points,), dtype=torch.int32.
+                Index of the surface/body each surface point belongs to.
+            surface_normals (torch.Tensor): Tensor of shape (num_surface_points, 3), dtype=torch.float32.
+                Normal vector of the surface at each surface point.
         """
         num_points = points.shape[0]
         assert points.shape == (num_points, 3)
@@ -58,9 +78,21 @@ class FlowGeometry:
         self.surface_normals = surface_normals
     @property
     def num_points(self):
+        """
+        Returns the number of points in the geometry.
+
+        Returns:
+            int: Total number of points.
+        """
         return self.points.shape[0]
     @property
     def num_edges(self):
+        """
+        Returns the number of edges in the geometry.
+
+        Returns:
+            int: Total number of edges.
+        """
         return self.connectivity.shape[0]
     
 
