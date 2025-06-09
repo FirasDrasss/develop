@@ -73,4 +73,4 @@ html_sidebars = {
 }
 
 nb_execution_mode = "off"
-autodoc_mock_imports = ["huggingface_hub", "tensordict","torch","dgl","pyarrow", "lightning","pyvista","tqdm","numpy","pandas","matplotlib"]
+autodoc_mock_imports = ["huggingface_hub", "tensordict","torch","dgl","pyarrow", "lightning","pyvista","tqdm","numpy","pandas","matplotlib", "pytorch_geometric"]

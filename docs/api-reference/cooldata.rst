@@ -11,6 +11,14 @@ cooldata.dgl_flow_field_dataset module
    :show-inheritance:
 
 
+cooldata.pyg_flow_field_dataset module
+-----------------------------------------
+
+.. automodule:: cooldata.pyg_flow_field_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cooldata.metadata module
 ------------------------
 
