@@ -1,6 +1,8 @@
-# Cooldata
+# Cooldata - A Large-Scale Electronics Cooling 3D Flow Field Dataset
 
-This Python dataset library is designed to streamline the end-to-end model training process, enabling efficient loading, visualization, and preparation of 3D data for machine learning applications. It supports advanced techniques, including graph neural networks and voxelized methods, with seamless integration into PyTorch workflows.
+Cooldata is a large-scale electronics cooling dataset, containing over 60k stationary 3D flow fields for a diverse set of geometries, simulated with the commercial solver Simcenter STAR-CCM+. This library can be used to acccess the dataset and streamline its application in machine learning tasks.
+
+![example case](docs/_static/case.png)
 
 ## Features
 
@@ -13,8 +15,8 @@ This Python dataset library is designed to streamline the end-to-end model train
     - L2 loss computation and aggregate force evaluation for model training.
   - **Planned PyG Support:** Implementing functionalities similar to DGL.
 - **Hugging Face Integration:** Direct dataset loading from [Hugging Face](https://huggingface.co/).
-- **Voxelized Flow Field Support:** Facilitates image processing-based ML approaches (Planned).
-- **Comprehensive Metadata Accessibility:** For advanced model comparison and evaluation (Planned).
+- **Voxelized Flow Field Support:** Facilitates image processing-based ML approaches.
+- **Comprehensive Metadata Accessibility:** All metadata is accessible through the library.
 
 ## Installation
 
@@ -36,15 +38,3 @@ See the `examples` folder for a detailed example of how to use the library.
 - Re-meshing with Random Point Sampling
 - Voxelized Flow Field Support
 - Inference of Surface Quantities from Volumetric Predictions
-- Enhanced Metadata Accessibility
-
-## Development
-
-This package uses [uv](https://docs.astral.sh/uv/) for package management. To get started, first install uv. Then run
-
-```bash
-uv venv
-uv sync
-```
-
-to create a virtualenv and install the required dependencies in it. For dgl, run the [install script](examples/meshgraphnet/install.sh).
