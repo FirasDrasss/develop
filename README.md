@@ -4,6 +4,8 @@ Cooldata is a large-scale electronics cooling dataset, containing over 60k stati
 
 ![example case](docs/_static/case.png)
 
+Find the documentation at [cooldata.readthedocs.io](https://cooldata.readthedocs.io/).
+
 ## Features
 
 - **Data Storage:** Organized in folders containing `.cgns` files for compatibility with computational fluid dynamics tools.
@@ -13,7 +15,7 @@ Cooldata is a large-scale electronics cooling dataset, containing over 60k stati
     - Surface and volume data in mesh format.
     - 3D visualization of samples and predictions.
     - L2 loss computation and aggregate force evaluation for model training.
-  - **Planned PyG Support:** Implementing functionalities similar to DGL.
+  - **PyG Support:** Implementing functionalities similar to DGL.
 - **Hugging Face Integration:** Direct dataset loading from [Hugging Face](https://huggingface.co/).
 - **Voxelized Flow Field Support:** Facilitates image processing-based ML approaches.
 - **Comprehensive Metadata Accessibility:** All metadata is accessible through the library.
@@ -34,7 +36,5 @@ See the `examples` folder for a detailed example of how to use the library.
 
 ## Roadmap
 
-- PyG Support
 - Re-meshing with Random Point Sampling
-- Voxelized Flow Field Support
 - Inference of Surface Quantities from Volumetric Predictions
