@@ -1,6 +1,6 @@
 [project]
 name = "cooldata"
-version = "0.1.9"
+version = "1.0.0"
 description = "Cooldata - A Large-Scale Electronics Cooling 3D Flow Field Dataset"
 readme = "README.md"
 authors = [
@@ -11,6 +11,7 @@ authors = [
   { name = "Beatrice Picco" },
   { name = "Daniel Schenk" },
 ]
+
 requires-python = "~=3.11"
 dependencies = [
     "huggingface-hub>=0.27.1",
@@ -27,6 +28,10 @@ dependencies = [
     "pyransame>=0.4.0",
     "torch-geometric>=2.6.1",
 ]
+
+[project.urls]
+Homepage = "https://cooldata.readthedocs.io/"
+Repository = "https://github.com/peteole/flow_field_dataset"
 
 [build-system]
 requires = ["hatchling"]

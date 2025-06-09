@@ -44,3 +44,12 @@ If you want to use the DGL support, you also need to install the [DGL](https://w
    usage/dgl
    usage/pyg
    api-reference/cooldata
+
+
+License
+-------
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0). You can view the full license [here](https://creativecommons.org/licenses/by-nc/4.0/).
+
+Contributing
+------------
+We welcome contributions to the Cooldata library! If you have suggestions, bug reports, or feature requests, please open an issue on our [GitHub repository](https://github.com/peteole/flow_field_dataset/issues).
