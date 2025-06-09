@@ -462,7 +462,7 @@ wheels = [
 
 [[package]]
 name = "cooldata"
-version = "0.1.7"
+version = "0.1.8"
 source = { editable = "." }
 dependencies = [
     { name = "huggingface-hub" },
@@ -470,10 +470,12 @@ dependencies = [
     { name = "lightning" },
     { name = "pandas" },
     { name = "pyarrow" },
+    { name = "pyransame" },
     { name = "pyvista", extra = ["all"] },
     { name = "tensorboard" },
     { name = "tensordict" },
     { name = "torch" },
+    { name = "torch-geometric" },
     { name = "torchvision" },
     { name = "tqdm" },
 ]
@@ -493,10 +495,12 @@ requires-dist = [
     { name = "lightning", specifier = ">=2.5.1.post0" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pyarrow", specifier = ">=20.0.0" },
+    { name = "pyransame", specifier = ">=0.4.0" },
     { name = "pyvista", extras = ["all"], specifier = ">=0.44.2" },
     { name = "tensorboard", specifier = ">=2.19.0" },
     { name = "tensordict", specifier = ">=0.5.0" },
     { name = "torch", specifier = ">=2.3.0" },
+    { name = "torch-geometric", specifier = ">=2.6.1" },
     { name = "torchvision", specifier = ">=0.19.0" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
@@ -2268,6 +2272,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pyransame"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pyvista" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fd/d6/7ffea55107e620f61b4d675d589cfd091298b7305afbf818b0841b9f2d89/pyransame-0.4.0.tar.gz", hash = "sha256:f8b937222554bacec3dc8317f6765e759a7f8d9c41bf12688fa7eb313b999237", size = 308801, upload-time = "2024-07-16T10:49:54.896Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/f2/195d14169e9c203d0279859378a46a20fcd73ead645965a7309e7649bc84/pyransame-0.4.0-py3-none-any.whl", hash = "sha256:ee4de063ab7bad477127c8af78e60f71104c7999e658477d09c4cf747d211918", size = 11753, upload-time = "2024-07-16T10:49:52.944Z" },
+]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
@@ -3025,6 +3042,25 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/9a/5d/327fb72044c22d68a826643abf2e220db3d7f6005a41a6b167af1ffbc708/torch-2.4.0-cp312-cp312-manylinux2014_aarch64.whl", hash = "sha256:bc3988e8b36d1e8b998d143255d9408d8c75da4ab6dd0dcfd23b623dfb0f0f57", size = 89746726, upload-time = "2024-07-24T15:29:48.218Z" },
     { url = "https://files.pythonhosted.org/packages/dc/95/a14dd84ce65e5ce176176393a80b2f74864ee134a31f590140456a4c0959/torch-2.4.0-cp312-cp312-win_amd64.whl", hash = "sha256:3374128bbf7e62cdaed6c237bfd39809fbcfaa576bee91e904706840c3f2195c", size = 197807123, upload-time = "2024-07-24T15:29:39.833Z" },
     { url = "https://files.pythonhosted.org/packages/c7/87/489ebb234e75760e06fa4789fa6d4e13c125beefa1483ce35c9e43dcd395/torch-2.4.0-cp312-none-macosx_11_0_arm64.whl", hash = "sha256:91aaf00bfe1ffa44dc5b52809d9a95129fca10212eca3ac26420eb11727c6288", size = 62123112, upload-time = "2024-07-24T15:29:28.357Z" },
+]
+
+[[package]]
+name = "torch-geometric"
+version = "2.6.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "fsspec" },
+    { name = "jinja2" },
+    { name = "numpy" },
+    { name = "psutil" },
+    { name = "pyparsing" },
+    { name = "requests" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e8/81/e1b015494cb9e0bf4c47cc8426e49736120248733be0e22072a5628ae9ed/torch_geometric-2.6.1.tar.gz", hash = "sha256:1f18f9d0fc4d2239d526221e4f22606a4a3895b5d965a9856d27610a3df662c6", size = 771490, upload-time = "2024-09-26T08:11:30.25Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/9f/157e913626c1acfb3b19ce000b1a6e4e4fb177c0bc0ea0c67ca5bd714b5a/torch_geometric-2.6.1-py3-none-any.whl", hash = "sha256:8faeb353f9655f7dbec44c5e0b44c721773bdfb279994da96b9b8b12fd30f427", size = 1135632, upload-time = "2024-09-26T08:11:27.194Z" },
 ]
 
 [[package]]

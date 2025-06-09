@@ -19,8 +19,8 @@ Features
 - **Data Storage:** Organized in folders containing `.cgns` files for compatibility with computational fluid dynamics tools.
 - **PyVista Integration:** Access to dataset samples as PyVista objects for easy 3D visualization and manipulation.
 - **Graph Neural Network Support:**
-  - **DGL Support:** Surface and volume data in mesh format, 3D visualization of samples and predictions, L2 loss computation and aggregate force evaluation for model training.
-  - **Planned PyG Support:** Implementing functionalities similar to DGL.
+- **DGL Support:** Surface and volume data in mesh format, 3D visualization of samples and predictions, L2 loss computation and aggregate force evaluation for model training.
+- **PyG Support:** Implementing functionalities similar to DGL.
 - **Hugging Face Integration:** Direct dataset loading from [Hugging Face](https://huggingface.co/).
 - **Voxelized Flow Field Support:** Facilitates image processing-based ML approaches.
 - **Comprehensive Metadata Accessibility:** All metadata is accessible through the library.
@@ -42,4 +42,5 @@ If you want to use the DGL support, you also need to install the [DGL](https://w
    usage/getting_started
    usage/voxels
    usage/dgl
+   usage/pyg
    api-reference/cooldata
