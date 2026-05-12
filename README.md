@@ -52,7 +52,6 @@ Place these two files in your data directory:
 ```
 Cooldataset/
     metadata.parquet       # design parameters for all 60,848 samples
-    sample_index.json      # maps each design ID to its run and batch
 ```
 
 ### Explore before downloading
