@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os
 import random
 import shutil
@@ -104,44 +103,38 @@ class SystemParameters:
 
 def df_row_to_system_parameters(df: pd.DataFrame, design_id: int) -> SystemParameters:
     """
-    Create a SystemParameters object from a DataFrame row.
-
-    Supports two formats:
-    - Trimmed metadata (has 'design_id' column): looks up by design_id value.
-    - Original full metadata (no 'design_id' column): uses iloc[design_id - 1].
+    Create a SystemParameters object for a given design_id from a DataFrame.
+    Expects a 'design_id' column (trimmed metadata format).
     """
     if not isinstance(df, pd.DataFrame):
         raise TypeError("Input 'df' must be a pandas DataFrame.")
     if not isinstance(design_id, int):
         raise TypeError("'design_id' must be an integer.")
 
-    if "design_id" in df.columns:
-        row = df[df["design_id"] == design_id]
-        if row.empty:
-            raise IndexError(f"design_id {design_id} not found in metadata.")
-        return SystemParameters.from_dataframe_row(row.iloc[0])
-    else:
-        row_id = design_id - 1
-        if not 0 <= row_id < len(df):
-            raise IndexError(f"design_id {design_id} out of bounds "
-                             f"(DataFrame has {len(df)} rows).")
-        return SystemParameters.from_dataframe_row(df.iloc[row_id])
+    row = df[df["design_id"] == design_id]
+    if row.empty:
+        raise IndexError(f"design_id {design_id} not found in metadata.")
+    return SystemParameters.from_dataframe_row(row.iloc[0])
 
 
 # ── MetadataFilter ────────────────────────────────────────────────────────────
 
 class MetadataFilter:
     """
-    Explore and download cooldata-v2 samples by metadata — no downloading needed
-    until you call .load().
+    Explore and download cooldata-v2 samples by metadata — no downloading
+    needed until you call .load().
 
-    Requires sample_index.json which maps design_id → run/batch for targeted
-    downloads. Place it next to metadata.parquet and it loads automatically.
+    Expects metadata_simulated.parquet which contains only the 60,848
+    simulated samples with columns: design_id, run, batch, T1-T6,
+    x1-x6, y1-y6, xs1-xs4, ys1-ys4, zs1-zs6, r5, r6, V.
+
+    Generate it once with trim_metadata.py if you only have the original
+    metadata.parquet and sample_index.json.
 
     Quick start
     -----------
     >>> from cooldata.metadata import MetadataFilter
-    >>> f = MetadataFilter("Cooldataset/metadata.parquet")
+    >>> f = MetadataFilter("Cooldataset/metadata_simulated.parquet")
     >>> f.summary()
 
     Download by filter:
@@ -157,73 +150,42 @@ class MetadataFilter:
     >>> ds = f.load_by_run("run_1", num_samples=100)
     """
 
-    def __init__(self, metadata_path: str | Path, index_path: str | Path = None):
-        self._path  = Path(metadata_path)
-        self._df    = pd.read_parquet(self._path)
-        self._mask  = pd.Series(True, index=self._df.index)
-        self._index : dict | None      = None
-        self._available_ids : set[int] | None = None
+    def __init__(self, metadata_path: str | Path):
+        """
+        Parameters
+        ----------
+        metadata_path : path to metadata_simulated.parquet
+        """
+        self._path = Path(metadata_path)
+        self._df   = pd.read_parquet(self._path)
+        self._mask = pd.Series(True, index=self._df.index)
 
-        self._index_path = (Path(index_path) if index_path is not None
-                            else self._path.parent / "sample_index.json")
-        self._load_index()
-
-    def _load_index(self) -> None:
-        if self._index_path.exists():
-            with open(self._index_path) as f:
-                self._index = json.load(f)
-            self._available_ids = set(int(k) for k in self._index.keys())
-
-    def _require_index(self) -> None:
-        if self._index is None:
-            raise RuntimeError(
-                "sample_index.json not found. Place it next to metadata.parquet."
+        # Validate expected format
+        required = {"design_id", "run", "batch"}
+        missing  = required - set(self._df.columns)
+        if missing:
+            raise ValueError(
+                f"metadata file is missing columns: {missing}. "
+                f"Run trim_metadata.py to generate metadata_simulated.parquet."
             )
-
-    def _get_simulated_df(self) -> pd.DataFrame:
-        """Return metadata rows for simulated samples only."""
-        if self._available_ids is not None:
-            return self._df[self._df.index.isin(
-                [did - 1 for did in self._available_ids]
-            )]
-        return self._df
 
     # ── Summary ───────────────────────────────────────────────────────────────
 
     def summary(self) -> None:
-        """
-        Print a summary of the dataset.
-        Scoped to simulated samples when sample_index.json is available.
-        """
-        if self._available_ids is not None:
-            # Build a df with design_id as index for simulated rows
-            sim_row_ids = [did - 1 for did in self._available_ids]
-            df          = self._df.iloc[sim_row_ids]
-            scope_note  = f"{len(df):,} simulated samples across 5 runs"
-            match_count = self._mask.iloc[sim_row_ids].sum()
-        else:
-            df          = self._df
-            scope_note  = (f"{len(df):,} total parameter combinations  "
-                           "— place sample_index.json next to metadata.parquet "
-                           "to scope to simulated samples only")
-            match_count = self._mask.sum()
-
-        # Run breakdown
-        run_counts = {}
-        if self._index is not None:
-            for v in self._index.values():
-                run_counts[v["run"]] = run_counts.get(v["run"], 0) + 1
-
+        """Print a summary of the dataset and current filter match count."""
+        df  = self._df
         sep = "=" * 54
+
+        run_counts = df["run"].value_counts().sort_index().to_dict()
+
         print(sep)
         print("  Cooldata v2 — Dataset Summary")
         print(sep)
-        print(f"  Showing          : {scope_note}")
-        if run_counts:
-            print()
-            print("  Samples per run  :")
-            for run, count in sorted(run_counts.items()):
-                print(f"    {run} : {count:,}")
+        print(f"  Total samples    : {len(df):,}")
+        print()
+        print("  Samples per run  :")
+        for run, count in sorted(run_counts.items()):
+            print(f"    {run} : {count:,}")
         print()
         print(f"  Inlet velocity V : {df['V'].min():.2f} – {df['V'].max():.2f}"
               f"  (mean {df['V'].mean():.2f})")
@@ -252,7 +214,7 @@ class MetadataFilter:
                   f"y [{active[f'y{i}'].min():.3f} – {active[f'y{i}'].max():.3f}]")
         print()
         print(sep)
-        print(f"  Current filter matches : {match_count:,} samples")
+        print(f"  Current filter matches : {self._mask.sum():,} samples")
         print(sep)
 
     # ── Filter methods (chainable) ────────────────────────────────────────────
@@ -357,7 +319,7 @@ class MetadataFilter:
                     min: int = None, max: int = None) -> MetadataFilter:
         """
         Filter by number of active cylinders (bodies 5–6).
-        A body is inactive when y == 1.0 (sentinel value).
+        A body is inactive when y == 1.0.
         """
         active_cyls = sum(
             (self._df[f"y{i}"] != 1.0).astype(int)
@@ -394,34 +356,22 @@ class MetadataFilter:
     def run(self, *run_names: str) -> MetadataFilter:
         """
         Restrict to samples from specific runs.
-        Example: f.run("run_1", "run_3")
         Available runs: run_1, run_3, run_4, run_6, run_7
+
+        Example: f.run("run_1", "run_3")
         """
-        self._require_index()
-        allowed_ids = {
-            int(did) for did, entry in self._index.items()
-            if entry["run"] in run_names
-        }
-        # Convert design IDs to row indices (design_id - 1)
-        allowed_rows = {did - 1 for did in allowed_ids}
-        self._mask &= self._df.index.isin(allowed_rows)
+        self._mask &= self._df["run"].isin(run_names)
         return self
 
     def custom(self, expr: str) -> MetadataFilter:
         """
         Apply a raw pandas query string on the metadata columns.
-        Available: T1–T6, x1–x6, y1–y6, xs1–xs4, ys1–ys4, zs1–zs6, r5, r6, V
+        Available: design_id, run, batch, T1–T6, x1–x6, y1–y6,
+                   xs1–xs4, ys1–ys4, zs1–zs6, r5, r6, V
 
         Example: f.custom("V > 4.5 and T1 < 80")
         """
         self._mask &= self._df.index.isin(self._df.query(expr).index)
-        return self
-
-    def simulated_only(self) -> MetadataFilter:
-        """Restrict filter to design IDs that have simulation files."""
-        self._require_index()
-        sim_row_ids = {did - 1 for did in self._available_ids}
-        self._mask &= self._df.index.isin(sim_row_ids)
         return self
 
     def reset(self) -> MetadataFilter:
@@ -432,36 +382,16 @@ class MetadataFilter:
     # ── Results ───────────────────────────────────────────────────────────────
 
     def count(self) -> int:
-        """Number of samples matching the current filter (intersected with simulated)."""
-        if self._available_ids is not None:
-            sim_rows = {did - 1 for did in self._available_ids}
-            return int((self._mask & self._df.index.isin(sim_rows)).sum())
+        """Number of samples matching the current filter."""
         return int(self._mask.sum())
 
     def get_design_ids(self) -> list[int]:
-        """
-        Return design IDs matching the current filter, restricted to
-        simulated samples when sample_index.json is available.
-        """
-        if self._available_ids is not None:
-            sim_rows = {did - 1 for did in self._available_ids}
-            mask = self._mask & self._df.index.isin(sim_rows)
-        else:
-            mask = self._mask
-        # Convert row indices back to design IDs (row_index + 1)
-        return [idx + 1 for idx in self._df[mask].index.tolist()]
+        """Return design IDs matching the current filter."""
+        return self._df[self._mask]["design_id"].tolist()
 
     def get_dataframe(self) -> pd.DataFrame:
-        """
-        Return filtered metadata as a DataFrame with design_id as first column.
-        Restricted to simulated samples when sample_index.json is available.
-        """
-        design_ids = self.get_design_ids()
-        row_ids    = [did - 1 for did in design_ids]
-        df         = self._df.iloc[row_ids].copy()
-        df.insert(0, "design_id", design_ids)
-        df = df.reset_index(drop=True)
-        return df
+        """Return filtered metadata as a DataFrame."""
+        return self._df[self._mask].reset_index(drop=True)
 
     # ── Download methods ──────────────────────────────────────────────────────
 
@@ -494,8 +424,7 @@ class MetadataFilter:
     def load_random(self, n: int, data_dir: str | Path = "Cooldataset",
                     seed: int = None):
         """
-        Download n randomly selected samples from the simulated dataset
-        (respects any active filters).
+        Download n randomly selected samples (respects active filters).
 
         Parameters
         ----------
@@ -520,14 +449,11 @@ class MetadataFilter:
         run_name    : e.g. "run_1"
         num_samples : optional cap.
         """
-        self._require_index()
-        design_ids = sorted(
-            int(did) for did, entry in self._index.items()
-            if entry["run"] == run_name
-        )
-        if not design_ids:
-            raise ValueError(f"No samples found for run '{run_name}'. "
-                             f"Available: {sorted(set(v['run'] for v in self._index.values()))}")
+        available_runs = self._df["run"].unique().tolist()
+        if run_name not in available_runs:
+            raise ValueError(f"Run '{run_name}' not found. "
+                             f"Available: {sorted(available_runs)}")
+        design_ids = self._df[self._df["run"] == run_name]["design_id"].tolist()
         if num_samples is not None:
             design_ids = design_ids[:num_samples]
         print(f"Downloading {len(design_ids)} samples from {run_name}.")
@@ -538,13 +464,11 @@ class MetadataFilter:
     def _download(self, design_ids: list[int],
                   data_dir: str | Path = "Cooldataset"):
         """
-        Download and load the given design IDs using sample_index.json
-        for targeted batch downloads.
+        Download and load the given design IDs using run/batch columns
+        for targeted batch downloads — only fetches batches that are needed.
         """
         import huggingface_hub as hf
         from cooldata.pyvista_flow_field_dataset import PyvistaFlowFieldDataset, PyvistaSample
-
-        self._require_index()
 
         if not design_ids:
             print("No samples to download.")
@@ -559,31 +483,30 @@ class MetadataFilter:
         for d in (volume_dir, surface_dir, tmp_dir):
             os.makedirs(d, exist_ok=True)
 
-        # Group by (run, batch) — only download each batch once
-        grouped : dict[tuple, list[int]] = defaultdict(list)
-        missing = []
-        for did in design_ids:
-            entry = self._index.get(str(did))
-            if entry is None:
-                missing.append(did)
-            else:
-                grouped[(entry["run"], entry["batch"])].append(did)
-
+        # Look up run/batch for each design_id directly from the DataFrame
+        id_set   = set(design_ids)
+        rows     = self._df[self._df["design_id"].isin(id_set)]
+        missing  = id_set - set(rows["design_id"].tolist())
         if missing:
-            print(f"  Warning: {len(missing)} design ID(s) not in index: "
-                  f"{missing[:5]}{'...' if len(missing) > 5 else ''}")
+            print(f"  Warning: {len(missing)} design ID(s) not found in metadata: "
+                  f"{sorted(missing)[:5]}{'...' if len(missing) > 5 else ''}")
+
+        # Group by (run, batch) — download each batch only once
+        grouped: dict[tuple, list[int]] = defaultdict(list)
+        for _, row in rows.iterrows():
+            grouped[(row["run"], row["batch"])].append(int(row["design_id"]))
 
         fs      = hf.HfFileSystem()
         samples : list[PyvistaSample] = []
+        total   = len(grouped)
 
-        total_batches = len(grouped)
         for batch_num, ((run_name, batch_name), batch_ids) in enumerate(grouped.items(), 1):
             zip_remote  = f"{_REPO_ID}/runs/{run_name}/{batch_name}.zip"
             zip_local   = tmp_dir / run_name / f"{batch_name}.zip"
             extract_dir = tmp_dir / run_name / batch_name
             os.makedirs(zip_local.parent, exist_ok=True)
 
-            print(f"  [{batch_num}/{total_batches}] {run_name}/{batch_name}.zip "
+            print(f"  [{batch_num}/{total}] {run_name}/{batch_name}.zip "
                   f"({len(batch_ids)} needed) ...", end=" ", flush=True)
             try:
                 fs.download(zip_remote, str(zip_local))
@@ -619,6 +542,6 @@ class MetadataFilter:
             return None
 
         ds = PyvistaFlowFieldDataset(samples)
-        ds.add_metadata(pd.read_parquet(self._path))
+        ds.add_metadata(self._df)
         print(f"\nLoaded {len(ds)} samples.")
         return ds
