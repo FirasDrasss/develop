@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import List, NamedTuple
 
 import pandas as pd
-import numpy as np
 
 _QUAD_INDICES     = [1, 2, 3, 4]
 _CYLINDER_INDICES = [5, 6]
@@ -104,7 +103,7 @@ class SystemParameters:
 def df_row_to_system_parameters(df: pd.DataFrame, design_id: int) -> SystemParameters:
     """
     Create a SystemParameters object for a given design_id from a DataFrame.
-    Expects a 'design_id' column (trimmed metadata format).
+    Expects a 'design_id' column.
     """
     if not isinstance(df, pd.DataFrame):
         raise TypeError("Input 'df' must be a pandas DataFrame.")
@@ -124,7 +123,7 @@ class MetadataFilter:
     Explore and download cooldata-v2 samples by metadata — no downloading
     needed until you call .load().
 
-    Expects metadata_simulated.parquet which contains only the 60,848
+    Expects metadata.parquet which contains the 60,848
     simulated samples with columns: design_id, run, batch, T1-T6,
     x1-x6, y1-y6, xs1-xs4, ys1-ys4, zs1-zs6, r5, r6, V.
 
@@ -134,7 +133,7 @@ class MetadataFilter:
     Quick start
     -----------
     >>> from cooldata.metadata import MetadataFilter
-    >>> f = MetadataFilter("Cooldataset/metadata_simulated.parquet")
+    >>> f = MetadataFilter("Cooldataset/metadata.parquet")
     >>> f.summary()
 
     Download by filter:
@@ -154,7 +153,7 @@ class MetadataFilter:
         """
         Parameters
         ----------
-        metadata_path : path to metadata_simulated.parquet
+        metadata_path : path to metadata.parquet
         """
         self._path = Path(metadata_path)
         self._df   = pd.read_parquet(self._path)
@@ -432,9 +431,8 @@ class MetadataFilter:
         seed : optional random seed for reproducibility.
         """
         design_ids = self.get_design_ids()
-        if seed is not None:
-            random.seed(seed)
-        chosen = random.sample(design_ids, min(n, len(design_ids)))
+        rng = random.Random(seed) if seed is not None else random
+        chosen = rng.sample(design_ids, min(n, len(design_ids)))
         print(f"Randomly selected {len(chosen)} samples (seed={seed}).")
         return self._download(chosen, data_dir)
 

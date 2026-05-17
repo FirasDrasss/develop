@@ -336,7 +336,7 @@ class PyvistaFlowFieldDataset:
             "Use MetadataFilter from cooldata.metadata instead:\n"
             "  from cooldata.metadata import MetadataFilter\n"
             "  ds = MetadataFilter('path/to/metadata.parquet').load_random(n=num_samples)",
-            DeprecationWarning,
+            FutureWarning,
             stacklevel=2,
         )
         loaded = cls.try_from_directory(data_dir, num_samples)
